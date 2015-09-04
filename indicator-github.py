@@ -9,6 +9,8 @@ import webbrowser
 import sys
 import signal
 
+temp = ""
+
 def goto_github(widget, callback_data=None):
     url = "https://github.com/notifications"
     webbrowser.open(url, new=0, autoraise=True)
@@ -60,16 +62,18 @@ def notify():
     with open(os.path.abspath(".") + "/token", "r") as f:
         token = f.read()
         token = token[:40]
+        global temp
+
         if len(token) != 40:
-            indicator.set_label("Token Error", "100% thrust")
             indicator.set_icon("github-new")
+            temp = "Token Error"
         else:
             msg = requests.get("https://api.github.com/notifications?access_token=" + token)
             print msg.text
             if msg.text == "[]":
                 indicator.set_icon("github")
             elif msg.text == '{"message":"Bad credentials","documentation_url":"https://developer.github.com/v3"}':
-                indicator.set_label("Bad Token", "100% thurst")
+                temp = "Token Error"
             else:
                 indicator.set_icon("github-new")
         return True
@@ -86,7 +90,7 @@ if __name__ == "__main__":
     GObject.timeout_add(30*1000, notify) ## Checks for notifications every 30 seconds
     print indicator.get_label()
 
-    if indicator.get_label() == "Token Error":
+    if temp == "Token Error":
         menu = Gtk.Menu()
         add_setup_link(menu)
         menu.append(Gtk.SeparatorMenuItem.new())
