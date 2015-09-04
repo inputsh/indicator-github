@@ -10,6 +10,9 @@ import sys
 import signal
 
 temp = ""
+out = ""
+no = 0
+menu = Gtk.Menu()
 
 def goto_github(widget, callback_data=None):
     url = "https://github.com/notifications"
@@ -20,36 +23,17 @@ def setup_github(widget, callback_data=None):
     webbrowser.open(url, new=0, autoraise=True)
 
 ### Menu items ###
-def add_separator(menu):
-    separator = Gtk.SeparatorMenuItem()
-    separator.show()
-    menu.append(separator)
-
-def add_setup_link(menu):
+def item_setup(menu):
     link = Gtk.MenuItem(label = "Setup GitHub")
     link.connect("activate", setup_github, None)
     menu.append(link)
     link.show()
 
-def add_github_link(menu):
+def item_github(menu):
     link = Gtk.MenuItem(label = "View on GitHub")
     link.connect("activate", goto_github, None)
     menu.append(link)
     link.show()
-
-def item_about(menu):
-    dialog = Gtk.AboutDialog.new()
-    dialog.set_program_name("GitHub Indicator")
-    dialog.set_version("v0.15 Alpha")
-    dialog.set_comments("GitHub Indicator designed with elementary OS in mind.")
-    dialog.set_authors(["r3bl"])
-    dialog.set_website("https://r3bl.me")
-    dialog.set_website_label("Website")
-    with open("LICENSE.txt","r") as f:
-        dialog.set_license(f.read())
-    dialog.show_all()
-    dialog.run()
-    dialog.destroy()
 
 def item_quit(menu):
     exit_item = Gtk.MenuItem("Quit")
@@ -57,25 +41,48 @@ def item_quit(menu):
     menu.append(exit_item)
     exit_item.show()
 
+def no_of_notifications(menu, no):
+    temp2 = no
+    print "no in no_of_notifications = " + str(no)
+    if temp2 == 1:
+        notifications_item = Gtk.MenuItem(str(no) + " new notification")
+        notifications_item.connect("activate", goto_github, None)
+        menu.append(notifications_item)
+        notifications_item.show()
+    else:
+        notifications_item = Gtk.MenuItem(str(no) + " new notifications")
+        notifications_item.connect("activate", goto_github, None)
+        menu.append(notifications_item)
+        notifications_item.show()
+
+def items_notifications(menu):
+    print "Todo"
+
 ### Checks notification ###
 def notify():
     with open(os.path.abspath(".") + "/token", "r") as f:
         token = f.read()
         token = token[:40]
         global temp
+        global out
 
         if len(token) != 40:
             indicator.set_icon("github-new")
             temp = "Token Error"
         else:
             msg = requests.get("https://api.github.com/notifications?access_token=" + token)
-            print msg.text
+            out = msg.text
+            global no
+            print out
             if msg.text == "[]":
                 indicator.set_icon("github")
             elif msg.text == '{"message":"Bad credentials","documentation_url":"https://developer.github.com/v3"}':
                 temp = "Token Error"
             else:
                 indicator.set_icon("github-new")
+                temp = "New Notifications"
+                no = out.count ('{"title":')
+                print no
         return True
 
 if __name__ == "__main__":
@@ -87,22 +94,23 @@ if __name__ == "__main__":
     indicator.set_status(1)
 
     notify()
+    print "Valuable: " + str(no)
     GObject.timeout_add(30*1000, notify) ## Checks for notifications every 30 seconds
     print indicator.get_label()
 
     if temp == "Token Error":
-        menu = Gtk.Menu()
-        add_setup_link(menu)
+        item_setup(menu)
+        menu.append(Gtk.SeparatorMenuItem.new())
+        item_quit(menu)
+        menu.show_all()
+    elif temp == "New Notifications":
+        no_of_notifications(menu, no)
         menu.append(Gtk.SeparatorMenuItem.new())
         item_quit(menu)
         menu.show_all()
     else:
-        menu = Gtk.Menu()
-        add_github_link(menu)
-        menu.append(Gtk.SeparatorMenuItem.new())
-        menu_item = Gtk.MenuItem.new_with_label("About...")
-        menu_item.connect("activate", item_about)
-        menu.append(menu_item)
+        print "This condition is useless and should be removed from the code"
+        item_github(menu)
         menu.append(Gtk.SeparatorMenuItem.new())
         item_quit(menu)
         menu.show_all()
