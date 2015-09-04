@@ -28,14 +28,7 @@ Final step:
 
     $ python indicator-python.py
 
-## To-do list
 
-* [ ] Create a new `github-new` icon.
-* [x] Fix `View on GitHub` option.
-* [ ] Make a better `About...` window.
-* [ ] Make a settings window.
-* [ ] Make a setup window (because the current setup process is a pain in the ass).
-* [ ] Find a way to display the number of notifications.
-* [ ] Make a list of the notifications in the dropdown menu.
-* [ ] Reduce the size of the icons
-* [ ] Change icons so they respect [GitHub's logo](https://github.com/logos)
+## License
+
+This program is licensed under GNU's GPL v3. Its full text is in the [LICENSE](/license.txt) file. The basic code logic was copied from [alimox/indicator-github](https://github.com/alim0x/indicator-github).
