@@ -7,9 +7,14 @@ from gi.repository import Gtk, GObject
 import requests
 import webbrowser
 import sys
+import signal
 
 def goto_github(widget, callback_data=None):
     url = "https://github.com/notifications"
+    webbrowser.open(url, new=0, autoraise=True)
+
+def setup_github(widget, callback_data=None):
+    url = "https://github.com/aleksandar-todorovic/indicator-github#setup"
     webbrowser.open(url, new=0, autoraise=True)
 
 ### Menu items ###
@@ -18,8 +23,13 @@ def add_separator(menu):
     separator.show()
     menu.append(separator)
 
-def add_link(menu):
-    url = "https://github.com/notifications"
+def add_setup_link(menu):
+    link = Gtk.MenuItem(label = "Setup GitHub")
+    link.connect("activate", setup_github, None)
+    menu.append(link)
+    link.show()
+
+def add_github_link(menu):
     link = Gtk.MenuItem(label = "View on GitHub")
     link.connect("activate", goto_github, None)
     menu.append(link)
@@ -28,10 +38,10 @@ def add_link(menu):
 def item_about(menu):
     dialog = Gtk.AboutDialog.new()
     dialog.set_program_name("GitHub Indicator")
-    dialog.set_version("v0.10 Alpha")
-    dialog.set_comments("GitHub Indicator designed for elementary OS")
+    dialog.set_version("v0.15 Alpha")
+    dialog.set_comments("GitHub Indicator designed with elementary OS in mind.")
     dialog.set_authors(["r3bl"])
-    dialog.set_website("https://r3bl.me/apps")
+    dialog.set_website("https://r3bl.me")
     dialog.set_website_label("Website")
     with open("LICENSE.txt","r") as f:
         dialog.set_license(f.read())
@@ -52,6 +62,7 @@ def notify():
         token = token[:40]
         if len(token) != 40:
             indicator.set_label("Token Error", "100% thrust")
+            indicator.set_icon("github-new")
         else:
             msg = requests.get("https://api.github.com/notifications?access_token=" + token)
             print msg.text
@@ -64,24 +75,33 @@ def notify():
         return True
 
 if __name__ == "__main__":
+
     ### Sets indicator ###
     indicator = AppIndicator3.Indicator.new("GitHub Notifier", "github", 0)
     indicator.set_icon_theme_path(os.path.abspath("."))
     indicator.set_icon("github")
     indicator.set_status(1)
 
-    ### Sets menu ###
-    menu = Gtk.Menu()
-    add_link(menu)
-    menu.append(Gtk.SeparatorMenuItem.new())
-    menu_item = Gtk.MenuItem.new_with_label("About...")
-    menu_item.connect("activate", item_about)
-    menu.append(menu_item)
-    menu.append(Gtk.SeparatorMenuItem.new())
-    item_quit(menu)
-    menu.show_all()
-
-    indicator.set_menu(menu)
     notify()
     GObject.timeout_add(30*1000, notify) ## Checks for notifications every 30 seconds
+    print indicator.get_label()
+
+    if indicator.get_label() == "Token Error":
+        menu = Gtk.Menu()
+        add_setup_link(menu)
+        menu.append(Gtk.SeparatorMenuItem.new())
+        item_quit(menu)
+        menu.show_all()
+    else:
+        menu = Gtk.Menu()
+        add_github_link(menu)
+        menu.append(Gtk.SeparatorMenuItem.new())
+        menu_item = Gtk.MenuItem.new_with_label("About...")
+        menu_item.connect("activate", item_about)
+        menu.append(menu_item)
+        menu.append(Gtk.SeparatorMenuItem.new())
+        item_quit(menu)
+        menu.show_all()
+
+    indicator.set_menu(menu)
     Gtk.main()
