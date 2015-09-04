@@ -1,10 +1,6 @@
 # GitHub Indicator
 
-Simple GitHub notification indicator.
-
-## Dependencies
-* AppIndicator3
-* Gtk
+Simple GitHub notification indicator designed for elementary OS Freya. It should work with Ubuntu 14.04 and its derivatives.
 
 ## Setup
 
@@ -34,11 +30,12 @@ Final step:
 
 ## To-do list
 
-* Create a new `github-new` icon.
-* Fix `View on GitHub` option.
-* Make a better `About...` window.
-* Make a settings window.
-* Make a setup window (because the current setup process is a pain in the ass).
-* Find a way to display the number of notifications.
-* Make a list of the notifications in the dropdown menu.
-* Reduce the size of the icons
+* [ ] Create a new `github-new` icon.
+* [x] Fix `View on GitHub` option.
+* [ ] Make a better `About...` window.
+* [ ] Make a settings window.
+* [ ] Make a setup window (because the current setup process is a pain in the ass).
+* [ ] Find a way to display the number of notifications.
+* [ ] Make a list of the notifications in the dropdown menu.
+* [ ] Reduce the size of the icons
+* [ ] Change icons so they respect [GitHub's logo](https://github.com/logos)

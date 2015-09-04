@@ -8,7 +8,7 @@ import requests
 import webbrowser
 import sys
 
-def goto_github():
+def goto_github(widget, callback_data=None):
     url = "https://github.com/notifications"
     webbrowser.open(url, new=0, autoraise=True)
 
@@ -19,8 +19,9 @@ def add_separator(menu):
     menu.append(separator)
 
 def add_link(menu):
+    url = "https://github.com/notifications"
     link = Gtk.MenuItem(label = "View on GitHub")
-    #link.connect("activate", goto_github())
+    link.connect("activate", goto_github, None)
     menu.append(link)
     link.show()
 
@@ -38,13 +39,11 @@ def item_about(menu):
     dialog.run()
     dialog.destroy()
 
-
 def item_quit(menu):
     exit_item = Gtk.MenuItem("Quit")
     exit_item.connect("activate", Gtk.main_quit)
     menu.append(exit_item)
     exit_item.show()
-
 
 ### Checks notification ###
 def notify():
@@ -58,19 +57,20 @@ def notify():
             print msg.text
             if msg.text == "[]":
                 indicator.set_icon("github")
+            elif msg.text == '{"message":"Bad credentials","documentation_url":"https://developer.github.com/v3"}':
+                indicator.set_label("Bad Token", "100% thurst")
             else:
                 indicator.set_icon("github-new")
         return True
 
-
 if __name__ == "__main__":
-    #set indicator
+    ### Sets indicator ###
     indicator = AppIndicator3.Indicator.new("GitHub Notifier", "github", 0)
     indicator.set_icon_theme_path(os.path.abspath("."))
     indicator.set_icon("github")
     indicator.set_status(1)
 
-    #set menu
+    ### Sets menu ###
     menu = Gtk.Menu()
     add_link(menu)
     menu.append(Gtk.SeparatorMenuItem.new())
@@ -83,5 +83,5 @@ if __name__ == "__main__":
 
     indicator.set_menu(menu)
     notify()
-    GObject.timeout_add(30*1000, notify) #check for notifications every 30 seconds
+    GObject.timeout_add(30*1000, notify) ## Checks for notifications every 30 seconds
     Gtk.main()
